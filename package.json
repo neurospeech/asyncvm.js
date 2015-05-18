@@ -1,0 +1,25 @@
+{
+  "name": "avmjs",
+  "version": "1.0.1",
+  "description": "Asynchronous Virtual Machine ",
+  "main": "avm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neurospeech/avm.js.git"
+  },
+  "keywords": [
+    "callback",
+    "hell",
+    "async",
+    "vm"
+  ],
+  "author": "Akash Kava",
+  "license": "Apache",
+  "bugs": {
+    "url": "https://github.com/neurospeech/avm.js/issues"
+  },
+  "homepage": "https://github.com/neurospeech/avm.js"
+}
