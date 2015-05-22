@@ -158,6 +158,20 @@ var vmCommands = {
       }
     }
     vm.push([s.body,s.test,runDo]);
+  },
+  "try": function(vm,s){
+    s = s[1];
+    vm.push(function(){
+      var e = vm.error();
+      if(e){
+        vm.push(s['catch']);
+      }
+      var f = s['finally'];
+      if(f){
+        vm.push(f);
+      }
+    });
+    vm.push(s['try']);
   }
 };
 
@@ -168,7 +182,7 @@ function asyncVM(thisArg,s){
   this.statements = s;
   this.callStack = [];
   this.stop = false;
-  
+
   var self = this;
   this.success = function(r){
     self.onSuccess(r);
@@ -179,6 +193,7 @@ function asyncVM(thisArg,s){
 }
 
 asyncVM.prototype = {
+  
   value: function(v){
     if(v === undefined)
       return this._value;
@@ -247,9 +262,13 @@ asyncVM.prototype = {
   },
   invokeStep: function(s){
     if(isFunction(s)){
-      var r = s.call(this.self,this.value());
-      if(r!==undefined){
-        this.value(r);
+      try{
+        var r = s.call(this.self,this.value());
+        if(r!==undefined){
+          this.value(r);
+        }
+      }catch(e){
+        this.error(e);        
       }
     }else{
       var a = s[0];

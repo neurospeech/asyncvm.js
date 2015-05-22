@@ -1,7 +1,8 @@
 {
   "name": "avmjs",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Asynchronous Virtual Machine ",
+  "homepage": "https://github.com/neurospeech/avm.js",
   "main": "avm.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
