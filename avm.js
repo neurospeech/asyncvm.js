@@ -164,7 +164,11 @@ var vmCommands = {
     vm.push(function(){
       var e = vm.error();
       if(e){
-        vm.push(s['catch']);
+        var c = s['catch'];
+        if(c){
+          vm.error(null);
+          vm.push(c);
+        }
       }
       var f = s['finally'];
       if(f){
@@ -176,6 +180,9 @@ var vmCommands = {
 };
 
 function asyncVM(thisArg,s){
+  
+  this.isAsyncVMPromise = true;
+  
   this.self = thisArg;
   this.failQ = [];
   this.thenQ = [];
@@ -198,6 +205,12 @@ asyncVM.prototype = {
     if(v === undefined)
       return this._value;
     this._value = v;
+  },
+  error: function(v){
+    if(v === undefined){
+      return this._error;
+    }
+    this._error = v;
   },
   
   then: function(f){
