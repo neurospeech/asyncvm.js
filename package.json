@@ -1,6 +1,6 @@
 {
   "name": "avmjs",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Asynchronous Virtual Machine ",
   "homepage": "https://github.com/neurospeech/avm.js",
   "main": "avm.js",
