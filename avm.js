@@ -145,7 +145,7 @@ var vmCommands = {
     }
     vm.push([s.init, s.test, runFor]);
   },
-  "do": function(vm,s){
+  "while": function(vm,s){
     s = s[1];
     function runDo(){
       var r = vm.value();
@@ -155,7 +155,7 @@ var vmCommands = {
     }
     vm.push([s.test,runDo]);
   },
-  "do-while": function(vm,s){
+  "do": function(vm,s){
     s = s[1];
     function runDo(){
       var r = vm.value();
@@ -177,9 +177,9 @@ var vmCommands = {
     if(c){
       vm.push(c);
     }
-    var currentStack = vm.callStack.slice();
-    var failed = vm.failed;
     if(c){
+      var currentStack = vm.callStack.slice();
+      var failed = vm.failed;
       vm.failed = function(e){
         vm.callStack = currentStack;      
         vm.failed = failed;
