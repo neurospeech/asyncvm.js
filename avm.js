@@ -49,9 +49,12 @@ var vmCommands = {
     }
     
     vm.push([function(){
-     var ra = pl.map(function(ri){ return ri.r; }); 
-     var v = fa.apply(vm.self,ra);
-     vm.value(v);
+      var e = vm.error();
+      if(!e){
+       var ra = pl.map(function(ri){ return ri.r; }); 
+       var v = fa.apply(vm.self,ra);
+       vm.value(v);
+      }
     }]);
 
     function next(){
@@ -63,10 +66,13 @@ var vmCommands = {
           return;
         }
         if(/failed/i.test(i.state)){
+          vm.error(i.r);
           failed = true;
         }
       }
-      if(!failed){
+      if(failed){
+        vm.failed(vm.error());
+      }else{
         vm.run();
       }
     }
@@ -136,7 +142,7 @@ var vmCommands = {
       if(r){
         vm.push([s.body,s.update, s.test, runFor]);
       }
-    };
+    }
     vm.push([s.init, s.test, runFor]);
   },
   "do": function(vm,s){
@@ -160,21 +166,27 @@ var vmCommands = {
     vm.push([s.body,s.test,runDo]);
   },
   "try": function(vm,s){
+    
     s = s[1];
-    vm.push(function(){
-      var e = vm.error();
-      if(e){
-        var c = s['catch'];
-        if(c){
-          vm.error(null);
-          vm.push(c);
-        }
-      }
-      var f = s['finally'];
-      if(f){
-        vm.push(f);
-      }
-    });
+    var f = s['finally'];
+    var c = s['catch'];
+    
+    if(f){
+      vm.push(f);
+    }
+    if(c){
+      vm.push(c);
+    }
+    var currentStack = vm.callStack.slice();
+    var failed = vm.failed;
+    if(c){
+      vm.failed = function(e){
+        vm.callStack = currentStack;      
+        vm.failed = failed;
+        vm.run();
+      };
+    }
+    
     vm.push(s['try']);
   }
 };
@@ -188,6 +200,7 @@ function asyncVM(thisArg,s){
   this.thenQ = [];
   this.statements = s;
   this.callStack = [];
+  this.catchStack = [];
   this.stop = false;
 
   var self = this;
@@ -282,6 +295,7 @@ asyncVM.prototype = {
         }
       }catch(e){
         this.error(e);        
+        this.failed(e);
       }
     }else{
       var a = s[0];
