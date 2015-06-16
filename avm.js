@@ -171,18 +171,25 @@ var avm = (function () {
             var f = s['finally'];
             var c = s['catch'];
 
+            var currentStack = vm.callStack.slice();
+            var failed = vm.failed;
+
             if (f) {
-                vm.push(f);
-            }
-            if (c) {
-                vm.push(c);
-            }
-            if (c) {
-                var currentStack = vm.callStack.slice();
-                var failed = vm.failed;
                 vm.failed = function (e) {
                     vm.callStack = currentStack;
                     vm.failed = failed;
+                    vm._error = e;
+                    vm.push(f);
+                    vm.run();
+                }
+            }
+            if (c) {
+                vm.failed = function (e) {
+                    vm.callStack = currentStack;
+                    vm.failed = failed;
+                    vm._error = undefined;
+                    vm.push(c);
+                    vm.value(e);
                     vm.run();
                 };
             }
@@ -237,7 +244,11 @@ var avm = (function () {
             this.run();
         },
         onFailed: function (r) {
-            this.value(r);
+            var a = new AtomEnumerator(this.failQ);
+            while (a.next()) {
+                var f = a.current();
+                f.apply(this.self, [r]);
+            }
         },
         push: function (s) {
             this.callStack.push({
@@ -266,8 +277,11 @@ var avm = (function () {
                     return;
                 } else {
                     // done? call then...
+
+                    var e = this.error();
+
                     var v = this.value();
-                    var ae = new AtomEnumerator(this.thenQ);
+                    var ae = new AtomEnumerator(e ? this.failQ : this.thenQ);
                     while (ae.next()) {
                         var f = ae.current();
                         f.apply(this.self, v);
